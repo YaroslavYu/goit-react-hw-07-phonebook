@@ -1,3 +1,7 @@
+import { useSelector, useDispatch } from 'react-redux';
+import { selectContacts } from '../redux/selectors';
+import { addContact } from 'redux/operations';
+
 import { Formik, ErrorMessage } from 'formik';
 import * as yup from 'yup';
 
@@ -17,10 +21,34 @@ const schema = yup.object({
   number: yup.number().required(),
 });
 
-export function ContactForm({ addContact }) {
+export function ContactForm() {
+  const contacts = useSelector(selectContacts);
+  const dispatch = useDispatch();
+
+  const checkContactIsAdded = newContact => {
+    const nameContact = newContact.name.trim().toUpperCase();
+    const findContact = contacts.find(
+      ({ name }) => name.trim().toUpperCase() === nameContact
+    );
+    if (findContact) {
+      return true;
+    } else return false;
+  };
+
+  const addCheckedContact = (newContact, actions) => {
+    const isAddedBefore = checkContactIsAdded(newContact);
+    if (isAddedBefore) {
+      alert('contact be already added before');
+      return;
+    }
+
+    dispatch(addContact(newContact));
+    actions.resetForm();
+  };
+
   return (
     <Formik
-      onSubmit={addContact}
+      onSubmit={addCheckedContact}
       initialValues={initialValues}
       validationSchema={schema}
     >

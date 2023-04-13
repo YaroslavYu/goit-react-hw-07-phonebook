@@ -1,34 +1,45 @@
 import { useSelector, useDispatch } from 'react-redux';
-
 import { StyledListItem } from './phonebook.styled';
-
-import { getContacts, getFilter } from './redux/selectors';
-import { delContact } from './redux/contactsSlice';
+import { deleteContact } from 'redux/operations';
+import {
+  selectFilteredContacts,
+  selectIsLoadind,
+  selectError,
+} from '../redux/selectors';
 
 export function ContactList() {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
-  const filterQuery = useSelector(getFilter);
 
-  const filteredContacts = contacts.filter(({ name }) =>
-    name.toUpperCase().includes(filterQuery.toUpperCase())
-  );
+  const isLoadindg = useSelector(selectIsLoadind);
+  const isError = useSelector(selectError);
+  const filteredContacts = useSelector(selectFilteredContacts);
 
   return (
-    <ul>
-      {filteredContacts.map(({ name, number, id }) => {
-        return (
-          <StyledListItem key={id}>
-            <span>
-              {name} - {number}
-            </span>
+    <>
+      {isLoadindg && <div>Loading phonebook...</div>}
+      {isError && (
+        <div style={{ color: 'red' }}>Something wrong. Pleas, try again</div>
+      )}
+      {!isLoadindg && !isError && (
+        <ul>
+          {filteredContacts.map(({ name, phone, id }) => {
+            return (
+              <StyledListItem key={id}>
+                <span>
+                  {name} - {phone}
+                </span>
 
-            <button type="button" onClick={() => dispatch(delContact(id))}>
-              Delete
-            </button>
-          </StyledListItem>
-        );
-      })}
-    </ul>
+                <button
+                  type="button"
+                  onClick={() => dispatch(deleteContact(id))}
+                >
+                  Delete
+                </button>
+              </StyledListItem>
+            );
+          })}
+        </ul>
+      )}
+    </>
   );
 }
